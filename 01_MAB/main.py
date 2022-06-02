@@ -12,7 +12,9 @@ sig = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
 if __name__ == "__main__":
     # The arguments from a terminal
     argv = sys.argv
-    if len(argv) != 3: # python main.py x x -> argv = [main.py, epsilon, init_val]
+    # python main.py x x -> argv = [main.py, epsilon, init_val]
+    # 0 ≤ epsilon ≤ 1, epsilon大->exploration
+    if len(argv) != 3:
         print("Invalid number of arguments.")
         quit()
 
