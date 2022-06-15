@@ -14,7 +14,7 @@ class Gridworld():
         self.height = height
         self.terminal_states = terminal_states
 
-    def proc_action(self, state, action):
+    def proc_action(self, state, action): # proceed? process?
         # Note that [0, 0] is located at the left top cell.
         # The UP action decrements the y-axis by one
         if action is Actions.UP:
@@ -29,8 +29,9 @@ class Gridworld():
         else: # LEFT
             if state[1] - 1 >= 0:
                 state[1] -= 1
-        
+
         # r(s, a, s') = -1 for all s, s' in S, S+ and a in A.
+        # 動いたら報酬が-1
         return state, -1
 
 class Agent():
@@ -46,12 +47,12 @@ class Agent():
         for s in env.terminal_states:
             for a in Actions:
                 self.random_policy[s[0], s[1], a.value] = 0.0
-        
+
         # optimal policy
         self.greedy_policy = [[[Actions.UP.name, Actions.DOWN.name, Actions.RIGHT.name, Actions.LEFT.name] for i in range(env.width)]for j in range(env.height)]
         for s in env.terminal_states:
             self.greedy_policy[s[0]][s[1]] = []
-    
+
     def policy_eval(self, num_steps):
         for i in range(num_steps):
             delta = 0 # The indicator of improvement.
@@ -85,7 +86,7 @@ class Agent():
                 greedy_actions = [a.name]
             elif max_act_val == exp_act_val:
                 greedy_actions.append(a.name)
-        
+
         return greedy_actions
 
     def policy_impr(self):
@@ -93,12 +94,12 @@ class Agent():
         for s in self.states:
             if s in self.env.terminal_states:
                 continue
-            
+
             # For non-terminal states
             old_action = copy.copy(self.greedy_policy[s[0]][s[1]])
             self.greedy_policy[s[0]][s[1]] = self.get_greedy_choise(s)
             print(str(old_action), str(self.greedy_policy[s[0]][s[1]]))
             if old_action != self.greedy_policy[s[0]][s[1]]:
                 stable = False
-        
+
         return stable
