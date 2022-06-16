@@ -35,6 +35,8 @@ def policy_iteration(): # 方策反復
         print("+++++ k =", num_steps, "+++++")
         print("The state values")
         print(agent.state_val, "\n")
+        # print("The action values")
+        # print(agent.action_val, "\n")
 
         # Break the loop if the policy imporvement does not change the policy
         if stable:
