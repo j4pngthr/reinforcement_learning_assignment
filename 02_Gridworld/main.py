@@ -30,17 +30,20 @@ def policy_iteration(): # 方策反復
     while num_steps < 1000: # 方策改善を1000回で打ち切る
         agent.policy_eval(1) # 方策評価 方策に対する状態価値関数を計算
         stable = agent.policy_impr() # 方策改善
+        num_steps += 1
+
+        print("+++++ k =", num_steps, "+++++")
+        print("The state values")
+        print(agent.state_val, "\n")
 
         # Break the loop if the policy imporvement does not change the policy
         if stable:
             break
 
-        # Continue the loop
-        num_steps += 1
 
-    print("+++++ k =", num_steps, "+++++")
-    print("The state values")
-    print(agent.state_val, "\n")
+    # print("+++++ k =", num_steps, "+++++")
+    # print("The state values")
+    # print(agent.state_val, "\n")
     print("The policy")
     print(agent.greedy_policy, "\n")
 
@@ -49,5 +52,4 @@ if __name__ == "__main__":
     #for i in [1, 2, 3, 10, 1000]:
     #    run_gridworld(i)
 
-    print(1)
     policy_iteration()
