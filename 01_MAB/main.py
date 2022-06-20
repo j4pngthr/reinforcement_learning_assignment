@@ -16,23 +16,31 @@ n_machine = 100
 init_val = 0
 
 def make_params(): # parameters
-  global mu, sig
-  mu = np.empty(0)
-  sig = np.empty(0)
-  for i in range(0, k):
-    mu = np.append(mu, random.gauss(0, 1))
-    sig = np.append(sig, 1)
+  for i in range(k):
+    _mu = np.random.normal(0, 1, n_machine).reshape((-1, 1)) # [[x_1], [x_2], ...]
+    # print("_mu", _mu)
+
+    if i == 0:
+      mu = _mu
+    else:
+      mu = np.hstack((mu, _mu)) # [[x_11, x_12], [x_21, x_22], ...]
+
+  print("mu", mu)
+  sig = [[1] * k] * n_machine
+  print("sig", sig)
+  return mu, sig
 
 # mab
 if __name__ == "__main__":
   key = 0
   if key == 0:
+    mu, sig = make_params()
     for epsilon in [0, 0.01, 0.1]:
       for i in range(0, n_machine):
         print(epsilon, "i", i)
         # 毎回初期化しないとダメ
-        make_params()
-        env = mab.MAB(k, mu, sig) # mab.py
+        # print("mu[i]", mu[i])
+        env = mab.MAB(k, mu[i], sig[i]) # mab.py
         a = egreedy.Agent(env, epsilon, init_val) # egreedy.py
 
         for t in range(0, env.MAX_STEPS):
