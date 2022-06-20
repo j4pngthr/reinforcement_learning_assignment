@@ -6,8 +6,8 @@ def write_data(param, seed, data, file_name):
     fout = open(file_name, "w") # 上書き
 
     # Write data
-    s = " "
-    fout.write(param + " " + str(seed) + s) # 1つ目の前
+    s = "\n"
+    # fout.write(param + " " + str(seed) + s) # 1つ目の前
     fout.write(s.join(map(str, data)))
     fout.write("\n")
     fout.close()
