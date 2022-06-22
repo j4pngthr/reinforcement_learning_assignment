@@ -7,13 +7,13 @@ import sys
 import random
 
 k = 10 # 1個のマシンの腕の数
-n_machine = 200
+n_machine = 2000
 MAX_STEPS = 1000
 init_val = 0
 
 class params(): # parameters
     # average_machine_rewards
-    avg_mac_rs = np.zeros(MAX_STEPS, dtype=np.float)
+    avg_mac_rs = np.zeros(MAX_STEPS, dtype=float)
     t = 0
     def make_params(self):
         for i in range(k):
@@ -39,7 +39,8 @@ if __name__ == "__main__":
                 p.avg_mac_rs[i] = 0
 
             for i in range(0, n_machine):
-                print(epsilon, "i", i)
+                if i % 100 == 0:
+                    print(epsilon, "machine_id", i)
 
                 env = mab.MAB(k, mu[i], sig[i]) # mab.py
                 a = egreedy.Agent(env, epsilon, init_val) # egreedy.py
@@ -48,7 +49,7 @@ if __name__ == "__main__":
                     p.t = _t
                     a.action(p) # egreedy.py/Agent.action
 
-            # Output the results to a file
+            # Output the average machine rewards to a file
             # a.get_name() -> egreedy.py/Agent
             temp = str(epsilon)
             file_name = ""
@@ -57,6 +58,13 @@ if __name__ == "__main__":
                     file_name = file_name + '_'
                 else:
                     file_name = file_name + _c
-            file_name = "eps" + file_name + ".txt"
-            myio.write_data(a.get_name(), 0, p.avg_mac_rs, file_name)
-  
+            file_name = "eps" + file_name
+            myio.write_data(a.get_name(), 0, p.avg_mac_rs, file_name + ".txt")
+
+            # get cumulative rewards
+            cum_avg_mac_rs = np.zeros(MAX_STEPS, dtype=np.float)
+            for i in range(1, MAX_STEPS):
+                cum_avg_mac_rs[i] = cum_avg_mac_rs[i - 1] + p.avg_mac_rs[i]
+
+            file_name = "cum_" + file_name
+            myio.write_data(a.get_name(), 0, cum_avg_mac_rs, file_name + ".txt")
