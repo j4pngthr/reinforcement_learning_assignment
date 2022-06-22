@@ -7,90 +7,56 @@ import sys
 import random
 
 k = 10 # 1個のマシンの腕の数
-n_machine = 2000
+n_machine = 200
 MAX_STEPS = 1000
 init_val = 0
 
 class params(): # parameters
-  # average_machine_rewards
-  avg_mac_rs = np.zeros(MAX_STEPS, dtype=np.float)
-  t = 0
-  def make_params(self):
-    for i in range(k):
-      _mu = np.random.normal(0, 1, n_machine).reshape((-1, 1)) # [[x_1], [x_2], ...]
-      # print("_mu", _mu)
+    # average_machine_rewards
+    avg_mac_rs = np.zeros(MAX_STEPS, dtype=np.float)
+    t = 0
+    def make_params(self):
+        for i in range(k):
+            _mu = np.random.normal(0, 1, n_machine).reshape((-1, 1)) # [[x_1], [x_2], ...]
 
-      if i == 0:
-        mu = _mu
-      else:
-        mu = np.hstack((mu, _mu)) # [[x_11, x_12], [x_21, x_22], ...]
+            if i == 0:
+                mu = _mu
+            else:
+                mu = np.hstack((mu, _mu)) # [[x_11, x_12], [x_21, x_22], ...]
 
-    # print("mu", mu)
-    sig = [[1] * k] * n_machine
-    # print("sig", sig)
-    return mu, sig
+        sig = [[1] * k] * n_machine
+        return mu, sig
 
 # mab
 if __name__ == "__main__":
-  key = 0
-  if key == 0:
-    p = params()
-    mu, sig = p.make_params()
-    for epsilon in [0, 0.01, 0.1]:
-      for i in range(0, MAX_STEPS):
-        p.avg_mac_rs[i] = 0
+    key = 0
+    if key == 0:
+        p = params()
+        mu, sig = p.make_params()
 
-      for i in range(0, n_machine):
-        print(epsilon, "i", i)
-        # 毎回初期化しないとダメ
-        # print("mu[i]", mu[i])
-        env = mab.MAB(k, mu[i], sig[i]) # mab.py
-        a = egreedy.Agent(env, epsilon, init_val) # egreedy.py
+        for epsilon in [0, 0.01, 0.1]:
+            for i in range(0, MAX_STEPS):
+                p.avg_mac_rs[i] = 0
 
-        for _t in range(0, MAX_STEPS):
-          # global t
-          p.t = _t
-          # print("t", t)
-          a.action(p) # egreedy.py/Agent.action
-          # print("p.avg...", p.avg_mac_rs[p.t])
+            for i in range(0, n_machine):
+                print(epsilon, "i", i)
 
-        # if i == 0:
-        #   avg_avg_rewards = np.empty(0)
-        #   for j in range(0, env.MAX_STEPS):
-        #     avg_avg_rewards = np.append(avg_avg_rewards, env.avg_rewards[j] / n_machine)
-        # else:
-        #   for j in range(0, env.MAX_STEPS):
-        #     avg_avg_rewards[j] += env.avg_rewards[j] / n_machine
+                env = mab.MAB(k, mu[i], sig[i]) # mab.py
+                a = egreedy.Agent(env, epsilon, init_val) # egreedy.py
 
-      # print(avg_avg_rewards)
-      # Output the results to a file
-      # a.get_name() -> Agentの関数 egreedy.py
-      temp = str(epsilon)
-      file_name = ""
-      for _c in temp:
-        if _c == '.':
-          file_name = file_name + '_'
-        else:
-          file_name = file_name + _c
-      file_name = "eps" + file_name + ".txt"
-      myio.write_data(a.get_name(), 0, p.avg_mac_rs, file_name)
-  # elif key == 1:
-  #   epsilon = 0.1
-  #   env = mab.MAB(k, mu, sig) # mab.py
-  #   # envの後
-  #   a = egreedy.Agent(env, epsilon, init_val)
-  #
-  #   for t in range(0, env.MAX_STEPS):
-  #     a.action() # egreedy.py/Agent.action
-  #
-  #   myio.write_data(a.get_name(), 0, env.avg_rewards.tolist(), "result.txt")
-  # elif key == 2:
-  #   c = 1 # ucb
-  #   env = mab.MAB(k, mu, sig) # mab.py
-  #   a = ucb.Agent(env, epsilon, init_val) # egreedy.py
-  #
-  #   for t in range(0, env.MAX_STEPS):
-  #     a.action(t, c)
+                for _t in range(0, MAX_STEPS):
+                    p.t = _t
+                    a.action(p) # egreedy.py/Agent.action
 
-    # Output the results to a file
-    # a.get_name() -> Agentの関数 egreedy.py
+            # Output the results to a file
+            # a.get_name() -> egreedy.py/Agent
+            temp = str(epsilon)
+            file_name = ""
+            for _c in temp:
+                if _c == '.':
+                    file_name = file_name + '_'
+                else:
+                    file_name = file_name + _c
+            file_name = "eps" + file_name + ".txt"
+            myio.write_data(a.get_name(), 0, p.avg_mac_rs, file_name)
+  
