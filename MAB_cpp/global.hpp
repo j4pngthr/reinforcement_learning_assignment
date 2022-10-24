@@ -44,7 +44,8 @@ using pip = pair<int, pii>;
 const int inf = numeric_limits<int>::max();
 const double dinf = numeric_limits<double>::infinity();
 
-extern int n_arm, n_machine, MAX_STEPS, init_val;
+extern int n_arm, n_machine, MAX_STEPS;
+extern double init_val;
 
 class params {
 public:
@@ -52,10 +53,15 @@ public:
     vector<double> mu;
     double sig = 1;
     int t;
+    vector<vector<double> > X;
 
     params() {
         avg_mac_rs.resize(MAX_STEPS);
         mu.resize(n_arm);
+        {
+            X.resize(n_machine);
+            rep(machine_id, n_machine) X[machine_id].resize(MAX_STEPS);
+        }
 
         rep(i, n_arm) {
             random_device seed_gen;
