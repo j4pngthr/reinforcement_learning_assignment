@@ -2,6 +2,9 @@
 #define egreedy_hpp
 
 // #include"bandit_algorithm.hpp"
+#include"mab.hpp"
+
+void egreedy(vector<Lever> &lv);
 
 class Egreedy /* : public Agent */ {
     MAB env;
@@ -18,17 +21,7 @@ public:
         }
     }
 
-    // int chooseArm() {
-    //     int arm_id;
-    //     if (epsilon > 1.0 * rand() / RAND_MAX) {
-    //         arm_id = rand() % n_arm;
-    //     } else {
-    //         double ma = -1000000.0;
-    //         rep(i, n_arm) if (chmax(ma, Q[i])) arm_id = i;
-    //     }
-    // }
-
-    int action(int machine_id, params &p) {
+    int action(int machine_id, int t, Agent &agt) {
         int arm_id;
         if (epsilon > 1.0 * rand() / RAND_MAX) {
             arm_id = rand() % n_arm;
@@ -37,7 +30,7 @@ public:
             rep(i, n_arm) if (chmax(ma, Q[i])) arm_id = i;
         }
 
-        double r = env.bandit(arm_id, machine_id, p);
+        double r = env.bandit(arm_id, machine_id, t, agt);
         // cerr << p.t << " " << p.avg_mac_rs[p.t] << endl;
         ++N[arm_id];
 

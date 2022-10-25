@@ -1,7 +1,7 @@
 #ifndef ucb_hpp
 #define ucb_hpp
 
-// #include"bandit_algorithm.hpp"
+#include"mab.hpp"
 
 class Ucb /* : public Agent */ {
     MAB env;
@@ -9,7 +9,6 @@ class Ucb /* : public Agent */ {
     vector<double> Q;
     vector<int> N;
 public:
-
     Ucb(MAB env, double c, double init_val) : env(env), c(c), init_val(init_val) {
         Q.resize(n_arm);
         N.resize(n_arm);
@@ -19,35 +18,18 @@ public:
         }
     }
 
-    // int chooseArm(params &p) {
-    //     double ma = -100000.0, c = epsilon;
-    //     int arm_id = -1;
-    //     for (int i = 0; i < n_arm; ++i) {
-    //         double temp = -100000.0;
-    //         if (N[i] == 0) {
-    //             arm_id = i;
-    //             break;
-    //         } else {
-    //             temp = Q[i] + c * sqrt(log(p.t) / N[i]);
-    //             if (chmax(ma, temp)) {
-    //                 arm_id = i;
-    //             }
-    //         }
-    //     }
-    //     assert(arm_id != -1);
-    //     return arm_id;
-    // }
-
-    int action(int machine_id, params &p) {
+    // Qはレバーを決めるのに使う
+    // 出力はこれまでもX
+    int action(int machine_id, int t, Agent &agt) {
         double ma = -100000.0;
         int arm_id = -1;
-        for (int i = 0; i < n_arm; ++i) {
+        for (int i = 0; i < n_arm; ++i) { // arm_idを求める
             double temp = -100000.0;
             if (N[i] == 0) {
                 arm_id = i;
                 break;
             } else {
-                temp = Q[i] + c * sqrt(log(p.t) / N[i]);
+                temp = Q[i] + c * sqrt(log(t) / N[i]);
                 if (chmax(ma, temp)) {
                     arm_id = i;
                 }
@@ -55,8 +37,8 @@ public:
         }
         assert(arm_id != -1);
 
-        double r = env.bandit(arm_id, machine_id, p);
-        // cerr << p.t << " " << p.avg_mac_rs[p.t] << endl;
+        double r = env.bandit(arm_id, machine_id, t, agt);
+
         ++N[arm_id];
 
         if (N[arm_id] == 1) { // 最初
@@ -67,5 +49,7 @@ public:
         return arm_id;
     }
 };
+
+void ucb(vector<Lever> &lv);
 
 #endif

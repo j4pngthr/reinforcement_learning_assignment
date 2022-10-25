@@ -27,13 +27,13 @@ typedef long long ll;
 
 template<typename T1, typename T2> inline bool chmin(T1 &a, T2 b) { if (a > b) { a = b; return 1; } return 0; }
 template<typename T1, typename T2> inline bool chmax(T1 &a, T2 b) { if (a < b) { a = b; return 1; } return 0; }
-template<typename T, typename U> T pow_(T a, U b) { return b ? pow_(a * a, b / 2) * (b % 2 ? a : 1) : 1; }
-template<class T, class U> ostream& operator << (ostream& os, const pair<T, U>& p) { os << p.F << " " << p.S; return os; }
-template<class T, class U> void operator += (pair<T, U>& p, const pair<T, U>& q) { p.F += q.F; p.S += q.S; }
-template<class T> ostream& operator << (ostream& os, const vector<T>& vec) { rep(i, sz(vec)) { if (i) os << " "; os << vec[i]; } return os; }
-template<typename T> inline istream& operator >> (istream& is, vector<T>& v) { rep(j, sz(v)) is >> v[j]; return is; }
-template<class T> void operator += (vector<T>& v, vector<T>& v2) { rep(i, sz(v2)) v.eb(v2[i]); }
-template<class T> ostream& operator << (ostream& os, const set<T>& s) { for (auto si : s) os << si << " "; return os; }
+template<typename MAX_STEPS, typename U> MAX_STEPS pow_(MAX_STEPS a, U b) { return b ? pow_(a * a, b / 2) * (b % 2 ? a : 1) : 1; }
+template<class MAX_STEPS, class U> ostream& operator << (ostream& os, const pair<MAX_STEPS, U>& p) { os << p.F << " " << p.S; return os; }
+template<class MAX_STEPS, class U> void operator += (pair<MAX_STEPS, U>& p, const pair<MAX_STEPS, U>& q) { p.F += q.F; p.S += q.S; }
+template<class MAX_STEPS> ostream& operator << (ostream& os, const vector<MAX_STEPS>& vec) { rep(i, sz(vec)) { if (i) os << " "; os << vec[i]; } return os; }
+template<typename MAX_STEPS> inline istream& operator >> (istream& is, vector<MAX_STEPS>& v) { rep(j, sz(v)) is >> v[j]; return is; }
+template<class MAX_STEPS> void operator += (vector<MAX_STEPS>& v, vector<MAX_STEPS>& v2) { rep(i, sz(v2)) v.eb(v2[i]); }
+template<class MAX_STEPS> ostream& operator << (ostream& os, const set<MAX_STEPS>& s) { for (auto si : s) os << si << " "; return os; }
 
 using pii = pair<int, int>;
 using pdi = pair<double, int>;
@@ -47,29 +47,80 @@ const double dinf = numeric_limits<double>::infinity();
 extern int n_arm, n_machine, MAX_STEPS;
 extern double init_val;
 
-class params {
+
+// class params {
+// public:
+//     vector<double> avg_mac_rs;
+//     vector<double> mu;
+//     double sig = 1;
+//     int MAX_STEPS;
+//     vector<vector<double> > X, X_tilde, theta;
+//
+//     params() {
+//         avg_mac_rs.resize(MAX_STEPS);
+//         mu.resize(n_arm);
+//         {
+//             X.resize(n_machine);
+//             rep(machine_id, n_machine) X[machine_id].resize(MAX_STEPS);
+//         }
+//         {
+//             X_tilde.resize(n_machine);
+//             rep(machine_id, n_machine) X_tilde[machine_id].resize(MAX_STEPS);
+//         }
+//         {
+//             theta.resize(n_machine);
+//             rep(machine_id, n_machine) theta[machine_id].resize(MAX_STEPS);
+//         }
+//
+//         rep(i, n_arm) {
+//             random_device seed_gen;
+//             default_random_engine engine(seed_gen());
+//             normal_distribution<> dist(0, 1);
+//             mu[i] = dist(engine);
+//         }
+//     }
+// };
+
+class Lever {
+    double mu;
+    const double sig = 1;
+    random_device seed_gen;
 public:
-    vector<double> avg_mac_rs;
-    vector<double> mu;
-    double sig = 1;
-    int t;
-    vector<vector<double> > X;
+    double getMu() { return mu; }
+    double getSig() { return sig; }
 
-    params() {
-        avg_mac_rs.resize(MAX_STEPS);
-        mu.resize(n_arm);
-        {
-            X.resize(n_machine);
-            rep(machine_id, n_machine) X[machine_id].resize(MAX_STEPS);
-        }
-
-        rep(i, n_arm) {
-            random_device seed_gen;
-            default_random_engine engine(seed_gen());
-            normal_distribution<> dist(0, 1);
-            mu[i] = dist(engine);
-        }
+    Lever() {
+        default_random_engine engine(seed_gen());
+        normal_distribution<> dist(0, 1);
+        mu = dist(engine);
+    }
+    double play() {
+        default_random_engine engine(seed_gen());
+        normal_distribution<> dist(mu, sig);
+        double r = dist(engine);
+        return r;
     }
 };
+
+class Agent {
+public:
+    vector<vector<double> > X, X_tilde, theta; // , n, n_tilde, Q, C;
+    vector<int> a;
+    // set<int> e; // 隣接ノードの集合
+
+    Agent() {
+        assert(MAX_STEPS > 0);
+        X = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5));
+        X_tilde = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5));
+        theta = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5));
+        // C = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5));
+        // n = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5));
+        // n_tilde = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5));
+        // Q = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5));
+        a = vector<int>(MAX_STEPS + 5);
+    }
+};
+
+void output(string filename, vector<Agent> &agt);
 
 #endif
