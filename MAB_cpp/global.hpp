@@ -86,6 +86,7 @@ class Lever {
     const double sig = 1;
     random_device seed_gen;
 public:
+    // double mu;
     double getMu() { return mu; }
     double getSig() { return sig; }
 
@@ -100,27 +101,63 @@ public:
         double r = dist(engine);
         return r;
     }
+    // bool operator<(const Lever& other) const {
+    //     return mu < other.mu;
+    // };
 };
 
 class Agent {
 public:
-    vector<vector<double> > X, X_tilde, theta; // , n, n_tilde, Q, C;
-    vector<int> a;
-    // set<int> e; // 隣接ノードの集合
+    vector<vector<double> > X, X_tilde, theta, n, Q, n_tilde;
+    vector<int> a, pullable;
+    vector<double> bias;
+    set<int> e; // 隣接ノードの集合
+    int limited = 0;
+    vector<Agent> ngb;
 
+    // すべての手法で共通
     Agent() {
+        pullable.resize(n_arm);
+        // 引けるレバーの数が限られているか
+        if (limited) {
+            int cnt = 0;
+            while (cnt < 3) {
+                int k = rand() % n_arm;
+                if (pullable[k]) continue;
+                pullable[k] = 1;
+                ++cnt;
+            }
+        } else {
+            rep(k, n_arm) {
+                pullable[k] = 1;
+            }
+        }
+
+        { // エージェントごとに各レバーにバイアスを作る
+            random_device seed_gen;
+            default_random_engine engine(seed_gen());
+            normal_distribution<> dist(0, 1);
+            bias.resize(n_arm);
+            rep(i, n_arm) bias[i] = dist(engine);
+            // rep(i, n_arm) cerr << bias[i] << " "; cerr << endl;
+        }
+    }
+
+    void init() {
         assert(MAX_STEPS > 0);
-        X = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5));
-        X_tilde = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5));
-        theta = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5));
-        // C = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5));
-        // n = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5));
-        // n_tilde = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5));
-        // Q = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5));
-        a = vector<int>(MAX_STEPS + 5);
+
+        X = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5, 0));
+        X_tilde = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5, 0));
+        theta = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5, 0));
+        n = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5, 0));
+        n_tilde = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5, 0));
+        Q = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5, 0));
+
+        a = vector<int>(MAX_STEPS + 5, 0);
     }
 };
 
 void output(string filename, vector<Agent> &agt);
+void calcXTilde(int i, int k, int t, Agent &agt);
 
 #endif

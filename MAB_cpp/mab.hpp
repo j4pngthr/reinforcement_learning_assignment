@@ -5,11 +5,21 @@
 
 class MAB {
     vector<double> mu, sig;
+    int inited = 0;
 public:
-    MAB(vector<double> mu, vector<double> sig) : mu(mu), sig(sig) {
+    MAB() {}
+    MAB(vector<double> _mu, vector<double> _sig) : mu(_mu), sig(_sig) {}
 
+    void init(vector<double> _mu, vector<double> _sig) {
+        inited = 1;
+
+        mu = _mu; sig = _sig;
     }
+
+    double getMu(int i) { return mu[i]; }
+
     double bandit(int arm_id, int machine_id, int t, Agent &agt) {
+        assert(inited);
         assert(arm_id >= 0 && arm_id < n_arm);
 
         random_device seed_gen;

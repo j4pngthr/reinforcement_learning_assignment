@@ -9,7 +9,7 @@ bool isVldId(int node) {
 }
 
 // get n_machine, T
-void getRealTrace(vector<vector<pii> >& contact_nodes) {
+void getRealTrace(vector<vector<pii> >& contact_nodes, vector<Agent> &agt) {
     // n_machine = end_vld_id - start_vld_id + 1;
 
     // 入力ファイル
