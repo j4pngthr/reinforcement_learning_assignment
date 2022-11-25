@@ -41,45 +41,11 @@ using pid = pair<int, double>;
 using pdd = pair<double, double>;
 using pip = pair<int, pii>;
 
-const int inf = numeric_limits<int>::max();
-const double dinf = numeric_limits<double>::infinity();
+const int inf = 1000000007;
+const double dinf = 1000000007;
 
-extern int n_arm, n_machine, MAX_STEPS;
+extern int n_arm, n_machine, MAX_STEPS, itv, round_id, N_ROUND;
 extern double init_val;
-
-
-// class params {
-// public:
-//     vector<double> avg_mac_rs;
-//     vector<double> mu;
-//     double sig = 1;
-//     int MAX_STEPS;
-//     vector<vector<double> > X, X_tilde, theta;
-//
-//     params() {
-//         avg_mac_rs.resize(MAX_STEPS);
-//         mu.resize(n_arm);
-//         {
-//             X.resize(n_machine);
-//             rep(machine_id, n_machine) X[machine_id].resize(MAX_STEPS);
-//         }
-//         {
-//             X_tilde.resize(n_machine);
-//             rep(machine_id, n_machine) X_tilde[machine_id].resize(MAX_STEPS);
-//         }
-//         {
-//             theta.resize(n_machine);
-//             rep(machine_id, n_machine) theta[machine_id].resize(MAX_STEPS);
-//         }
-//
-//         rep(i, n_arm) {
-//             random_device seed_gen;
-//             default_random_engine engine(seed_gen());
-//             normal_distribution<> dist(0, 1);
-//             mu[i] = dist(engine);
-//         }
-//     }
-// };
 
 class Lever {
     double mu;
@@ -114,10 +80,40 @@ public:
     set<int> e; // 隣接ノードの集合
     int limited = 0;
     vector<Agent> ngb;
+    vector<double> lambda, d, hop, parent;
+    int id;
 
-    // すべての手法で共通
+    // 1度だけ
     Agent() {
-        pullable.resize(n_arm);
+        lambda.resize(n_machine);
+
+        d.resize(n_machine);
+        rep(j, n_machine) d[j] = inf;
+
+        hop.resize(n_machine);
+        rep(j, n_machine) hop[j] = inf;
+
+        parent.resize(n_machine);
+        rep(j, n_machine) parent[j] = -1;
+    }
+
+    void initFixed(int _id) {
+        id = _id;
+        d[id] = 0;
+        hop[id] = 0;
+    }
+
+    // roundの度，手法によらず
+    void setBias() {
+        random_device seed_gen;
+        default_random_engine engine(seed_gen());
+        normal_distribution<> dist(0, 1);
+        bias.resize(n_arm);
+        rep(i, n_arm) bias[i] = dist(engine);
+    }
+
+    void setPullableLever() {
+        pullable = vector<int>(n_arm, 0);
         // 引けるレバーの数が限られているか
         if (limited) {
             int cnt = 0;
@@ -132,17 +128,9 @@ public:
                 pullable[k] = 1;
             }
         }
-
-        { // エージェントごとに各レバーにバイアスを作る
-            random_device seed_gen;
-            default_random_engine engine(seed_gen());
-            normal_distribution<> dist(0, 1);
-            bias.resize(n_arm);
-            rep(i, n_arm) bias[i] = dist(engine);
-            // rep(i, n_arm) cerr << bias[i] << " "; cerr << endl;
-        }
     }
 
+    // roundの度，手法ごとに
     void init() {
         assert(MAX_STEPS > 0);
 

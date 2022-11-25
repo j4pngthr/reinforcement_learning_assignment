@@ -55,9 +55,8 @@ public:
         agt[i].a[t] = arm_id;
 
         double r = env.bandit(arm_id, i, t, agt[i]) + agt[i].bias[arm_id];
+        agt[i].X[arm_id][t] = r;
 
-        ++agt[i].n[arm_id][t];
-        // これなに？
         if (agt[i].n[arm_id][t] == 1) { // 最初
             agt[i].Q[arm_id][t] = r;
         } else {

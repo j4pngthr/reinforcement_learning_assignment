@@ -27,6 +27,7 @@ public:
         normal_distribution<> dist(mu[arm_id], sig[arm_id]);
         double r = dist(engine);
         agt.X[arm_id][t] = r;
+        // agt.X[arm_id][t] = r + agt.bias[arm_id];
 
         return r;
     }

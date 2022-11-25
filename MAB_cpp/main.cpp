@@ -3,25 +3,19 @@
 #include"egreedy.hpp"
 #include"ucb.hpp"
 #include"gossip.hpp"
-#include"proposed.hpp"
 #include"getRealTrace.hpp"
 
-int n_arm = 10, n_machine = 78, MAX_STEPS = 1500;
+int n_arm = 10, n_machine = 78, MAX_STEPS = 20000, N_ROUND = 10, round_id;
 double init_val = 0; // 78, 1000
 
-int main() {
+void round(vector<Agent> &agt, vector<vector<pii> > &contact_nodes) {
     vector<Lever> lv(n_arm);
     {
         vector<double> v;
         rep(k, n_arm) v.eb(lv[k].getMu());
         sort(all(v));
-        cerr << v << endl;
+        // cerr << "lv    " << v << endl;
     }
-
-    // 各手法で共通のエージェント
-    vector<Agent> agt(n_machine); // global.hpp, bias
-    vector<vector<pii> > contact_nodes;
-    getRealTrace(contact_nodes, agt);
 
     vector<MAB> env(n_machine); // mab.hpp
     // envの初期化
@@ -37,21 +31,39 @@ int main() {
 
     // バイアスの影響を調べる
     double sum = 0;
-    rep(machine_id, n_machine) {
-        vector<double> v, vb;
+    rep(i, n_machine) {
+        vector<pdi> v, vb; // バイアスなし，あり
         rep(k, n_arm) {
-            double mu_d = env[machine_id].getMu(k);
-            v.eb(mu_d);
-            mu_d += agt[machine_id].bias[k];
-            vb.eb(mu_d);
+            double mu_d = env[i].getMu(k);
+            v.eb(mu_d, k);
+            mu_d += agt[i].bias[k];
+            vb.eb(mu_d, k);
         }
         sort(all(v)); sort(all(vb));
-        cerr << v[0] << " " << v[sz(v) - 1] << "    " << vb[0] << " " << vb[sz(vb) - 1] << endl;
-        sum += vb[sz(vb) - 1] - v[sz(v) - 1];
+        sum += vb[sz(vb) - 1].S - v[sz(v) - 1].S;
     }
-    cerr << "diff " << sum / n_machine << endl;
 
     cerr << "ucb" << endl; ucb(agt, env);
-    cerr << "ucb2_0" << endl; ucb2(agt, contact_nodes, env, 0);
-    cerr << "ucb2_1" << endl; ucb2(agt, contact_nodes, env, 1);
+    // cerr << "ucb2_0" << endl; ucb2(agt, contact_nodes, env, 0, 0);
+    // cerr << "ucb2_1" << endl; ucb2(agt, contact_nodes, env, 1, 0);
+    // cerr << "ucb3" << endl; ucb2(agt, contact_nodes, env, 1, 1);
+    cerr << "gossip" << endl; gossip(agt, contact_nodes, env);
+}
+
+int main() {
+    // 各手法で共通のエージェント
+    vector<Agent> agt(n_machine); // global.hpp, bias
+    rep(i, n_machine) agt[i].initFixed(i); // id, d[id], hop[id]
+
+    vector<vector<pii> > contact_nodes;
+    getRealTrace(contact_nodes, agt); // agt.e, lambda. d, hop, parent
+
+    for (round_id = 0; round_id < N_ROUND; ++round_id) {
+        cerr << "round_id " << round_id << endl;
+        rep(i, n_machine) {
+            agt[i].setBias();
+            agt[i].setPullableLever();
+        }
+        round(agt, contact_nodes);
+    }
 }
