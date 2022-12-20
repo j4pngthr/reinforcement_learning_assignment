@@ -26,7 +26,7 @@ public:
             {
                 chmax(agt[i].n_tilde[k][t + 1], agt[i].n[k][t]);
                 for (int j : agt[i].e) {
-                    chmax(agt[i].n_tilde[k][t + 1], agt[j].n_tilde[k][t]);
+                    if (agt[i].met_last[j] == t) chmax(agt[i].n_tilde[k][t + 1], agt[j].n_tilde[k][t]);
                 }
             }
             if (agt[i].n[k][t] < agt[i].n_tilde[k][t] - n_machine) {
@@ -35,27 +35,33 @@ public:
         }
 
         int arm_id = -1;
-        double max_val = -100000.0;
         if (A.empty()) { // arm_idを決める, line 7
+            double ma = -100000.0;
             rep(k, n_arm) {
                 if (!agt[i].pullable[k]) continue;
 
                 double alpha1 = 64.0; // Cの1つ上の式, p13
                 rep(_, 17) alpha1 /= n_machine;
-                double C = sqrt(2.0 * n_machine / agt[i].n[k][t] * log(t)) + alpha1; // p13
-                agt[i].Q[k][t] = agt[i].theta[k][t - 1] + C;
-                if (chmax(max_val, agt[i].Q[k][t])) {
-                    arm_id = k;
-                }
+                // double C = sqrt(2.0 * n_machine / agt[i].n[k][t] * log(t)) + alpha1; // p13
+                agt[i].Q[k][t] = agt[i].theta[k][t - 1]; // + C;
+                // if (i == 0 && t < 20) cerr << "k t theta " << k << " " << t << " " << agt[i].theta[k][t - 1] << endl;
+                chmax(ma, agt[i].Q[k][t]);
             }
-        } else { // line 12
-            arm_id = A[rand() % sz(A)];
+
+            rep(k, n_arm) if (abs(agt[i].Q[k][t] - ma) < eps) A.eb(k);
         }
+        arm_id = A[rand() % sz(A)];
         assert(arm_id != -1);
         agt[i].a[t] = arm_id;
 
-        double r = env.bandit(arm_id, i, t, agt[i]) + agt[i].bias[arm_id];
-        agt[i].X[arm_id][t] = r;
+        // if (i == 0 && t < 20) {
+        //     cerr << "arm_id " << arm_id << endl;
+        //     cerr << "A \"" << A << "\""<< endl;
+        //     cerr << "Q ";
+        //     rep(k, n_arm) cerr << agt[i].Q[k][t] << " "; cerr << endl;
+        // }
+
+        double r = env.bandit(arm_id, i, t, agt[i]); // + agt[i].bias[arm_id];
 
         if (agt[i].n[arm_id][t] == 1) { // 最初
             agt[i].Q[arm_id][t] = r;

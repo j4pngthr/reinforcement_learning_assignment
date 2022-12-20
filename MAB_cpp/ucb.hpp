@@ -85,22 +85,14 @@ public:
                 break;
             } else {
                 double temp = agt.Q[k][t] + c * sqrt(log(t) / agt.n[k][t]);
-                // if (machine_id == 1 && t == 3) cerr << agt.Q[k][t] << " " << agt.n[k][t] << " " << temp << endl;
                 if (chmax(ma, temp)) {
                     arm_id = k;
                 }
             }
         }
-        // assert(cnt); // cntは正でなければならない
-        // if (arm_id == -1) {
-        //     cerr << "arm_id = -1, machine_id, t " << machine_id << " " << t << endl;
-        // }
         assert(arm_id != -1);
 
         double r = env.bandit(arm_id, machine_id, t, agt) + agt.bias[arm_id]; // mab.hpp
-        // double r = env.bandit(arm_id, machine_id, t, agt);
-        // double r = _r + agt.bias[arm_id];
-        // if (t == MAX_STEPS - 1) cerr << machine_id << " " << arm_id << " " << _r << " " << agt.bias[arm_id] << endl;
 
         ++agt.n[arm_id][t];
 
@@ -114,6 +106,6 @@ public:
 };
 
 void ucb(vector<Agent> &agt, vector<MAB> &env);
-void ucb2(vector<Agent> &agt, vector<vector<pii> > &contact_nodes, vector<MAB> &env, int excInfo, int weighted);
+void ucb2(vector<Agent> &agt, vector<vector<pii> > &contact_nodes, vector<MAB> &env, int exc_info, int exc_Q, int weighted);
 
 #endif

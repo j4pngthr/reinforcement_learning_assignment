@@ -4,17 +4,26 @@
 #include"ucb.hpp"
 #include"gossip.hpp"
 #include"getRealTrace.hpp"
+#include"iucb.hpp"
 
-int n_arm = 10, n_machine = 78, MAX_STEPS = 20000, N_ROUND = 10, round_id;
+int n_arm = 10, n_machine = 78, MAX_STEPS = 2000, N_ROUND = 10, round_id;
 double init_val = 0; // 78, 1000
 
 void round(vector<Agent> &agt, vector<vector<pii> > &contact_nodes) {
     vector<Lever> lv(n_arm);
-    {
-        vector<double> v;
-        rep(k, n_arm) v.eb(lv[k].getMu());
-        sort(all(v));
-        // cerr << "lv    " << v << endl;
+    { // レバーの中身表示
+        // vector<pdi> v;
+        // rep(k, n_arm) v.eb(lv[k].getMu(), k);
+        // sort(all(v), greater<>());
+        // cerr << "lv    ";
+        // rep(k, n_arm) cerr << v[k].F << " " << v[k].S << "    "; cerr << endl;
+        //
+        // v.clear();
+        // // バイアス込みで
+        // rep(k, n_arm) v.eb(lv[k].getMu() + agt[0].bias[k], k);
+        // sort(all(v), greater<>());
+        // cerr << "lv+bias    ";
+        // rep(k, n_arm) cerr << v[k].F << " " << v[k].S << "    "; cerr << endl;
     }
 
     vector<MAB> env(n_machine); // mab.hpp
@@ -44,10 +53,12 @@ void round(vector<Agent> &agt, vector<vector<pii> > &contact_nodes) {
     }
 
     cerr << "ucb" << endl; ucb(agt, env);
-    // cerr << "ucb2_0" << endl; ucb2(agt, contact_nodes, env, 0, 0);
-    // cerr << "ucb2_1" << endl; ucb2(agt, contact_nodes, env, 1, 0);
-    // cerr << "ucb3" << endl; ucb2(agt, contact_nodes, env, 1, 1);
+    // cerr << "ucb2_0" << endl; ucb2(agt, contact_nodes, env, 0, 0); // exc_info, exc_Q, weighted
+    // cerr << "ucb2_1" << endl; ucb2(agt, contact_nodes, env, 1, 0, 0);
+    cerr << "ucb3" << endl; ucb2(agt, contact_nodes, env, 1, 1, 1);
     cerr << "gossip" << endl; gossip(agt, contact_nodes, env);
+    cerr << "iucb_global" << endl; iucb(agt, contact_nodes, env, 1);
+    // cerr << "iucb" << endl; iucb(agt, contact_nodes, env, 0);
 }
 
 int main() {

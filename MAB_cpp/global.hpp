@@ -79,9 +79,13 @@ public:
     vector<double> bias;
     set<int> e; // 隣接ノードの集合
     int limited = 0;
-    vector<Agent> ngb;
+
     vector<double> lambda, d, hop, parent;
     int id;
+
+    // vector<vector<double> > Qd;
+    // vector<Agent> ngb; // initがめんどい
+    vector<int> met_last;
 
     // 1度だけ
     Agent() {
@@ -95,6 +99,8 @@ public:
 
         parent.resize(n_machine);
         rep(j, n_machine) parent[j] = -1;
+
+        met_last.resize(n_machine);
     }
 
     void initFixed(int _id) {
@@ -141,11 +147,14 @@ public:
         n_tilde = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5, 0));
         Q = vector<vector<double> >(n_arm, vector<double>(MAX_STEPS + 5, 0));
 
-        a = vector<int>(MAX_STEPS + 5, 0);
+        a = vector<int>(MAX_STEPS + 5, -1);
+
+        met_last = vector<int>(n_machine, -1);
     }
 };
 
 void output(string filename, vector<Agent> &agt);
 void calcXTilde(int i, int k, int t, Agent &agt);
+void excInfo(int t, vector<Agent> &agt, vector<vector<pii> > &contact_nodes, int exc_Q, int weighted, vector<double> C_wc, int need_ngb, int update_unused);
 
 #endif

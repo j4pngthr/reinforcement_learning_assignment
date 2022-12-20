@@ -14,7 +14,7 @@ void ucb(vector<Agent> &agt, vector<MAB> &env) {
         }
 
         rep(t, MAX_STEPS) {
-            if (t % 1000 == 0) cerr << "t " << t << endl;
+            if (t % 5000 == 0) cerr << "t " << t << endl;
 
             rep(i, n_machine) {
                 int arm_id = a[i].action(i, t, agt[i]); // ucb.hpp
@@ -86,7 +86,7 @@ void calcWeightedConnectivity(vector<Agent> &agt, vector<double> &C_wc) {
 // 情報交換あり or なし, バイアスあり
 // 使うの agt.n, Q, X
 // t←t-1, n, Q
-void ucb2(vector<Agent> &agt, vector<vector<pii> > &contact_nodes, vector<MAB> &env, int excInfo, int weighted) {
+void ucb2(vector<Agent> &agt, vector<vector<pii> > &contact_nodes, vector<MAB> &env, int exc_info, int exc_Q, int weighted) {
     vector<double> C_wc(n_machine); // 中心性
     if (weighted) {
         calcWeightedConnectivity(agt, C_wc);
@@ -113,7 +113,7 @@ void ucb2(vector<Agent> &agt, vector<vector<pii> > &contact_nodes, vector<MAB> &
         }
 
         rep3(t, 1, MAX_STEPS) {
-            if (t % 1000 == 0) cerr << "t " << t << endl;
+            if (t % 5000 == 0) cerr << "t " << t << endl;
 
             // tに関して更新されていない値を更新
             rep(i, n_machine) {
@@ -124,41 +124,16 @@ void ucb2(vector<Agent> &agt, vector<vector<pii> > &contact_nodes, vector<MAB> &
             }
 
             // 各エージェントがレバーを引く
-            rep(machine_id, n_machine) {
-                int arm_id = a[machine_id].action(machine_id, t, agt[machine_id]); // Xを求める
-                agt[machine_id].a[t] = arm_id;
+            rep(i, n_machine) {
+                int arm_id = a[i].action(i, t, agt[i]); // Xを求める
+                agt[i].a[t] = arm_id;
             }
 
-            if (!excInfo) continue;
-            // 情報交換
-            for (pii p : contact_nodes[t]) {
-                int i = p.F, j = p.S;
-                assert(i >= 0 && i < n_machine && j >= 0 && j < n_machine);
-
-                double alpha = 0.5;
-                if (weighted) {
-                    assert(C_wc[i] + C_wc[j] > eps);
-                    alpha = C_wc[i] / (C_wc[i] + C_wc[j]);
-                }
-
-                rep(k, n_arm) {
-                    if (!agt[i].pullable[k] && !agt[j].pullable[k]) continue;
-                    else if (agt[i].pullable[k] && agt[j].pullable[k]) {
-                        rep(_, 2) {
-                            agt[i].Q[k][t] = alpha * agt[i].Q[k][t - 1] + (1 - alpha) * agt[j].Q[k][t - 1];
-                            swap(i, j);
-                        }
-                    } else if (agt[i].pullable[k]) {
-                        agt[j].pullable[k] = 1;
-                    } else if (agt[j].pullable[k]) {
-                        agt[i].pullable[k] = 1;
-                    }
-                }
-            }
+            if (exc_info) excInfo(t, agt, contact_nodes, exc_Q, weighted, C_wc, 0, 0); 
         }
 
         string filename = "ucb2_1.txt";
-        if (!excInfo) filename = "ucb2_0.txt";
+        if (!exc_info) filename = "ucb2_0.txt";
         if (weighted) filename = "ucb3.txt";
         output(filename, agt);
     }
