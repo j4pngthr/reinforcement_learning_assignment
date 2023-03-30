@@ -40,23 +40,41 @@ public:
 
         int arm_id = -1;
         if (A.empty()) { // arm_idを決める, line 7
-            double ma = -100000.0;
             rep(k, n_arm) {
                 if (!agt[i].pullable[k]) continue;
 
-                // double alpha1 = 64.0; // Cの1つ上の式, p13
-                // rep(_, 17) alpha1 /= n_machine;
-                double C = sqrt(2.0 * n_machine / agt[i].n[k][t] * log(t)); // + alpha1; // p13
-                agt[i].Q[k][t] = agt[i].theta[k][t - 1] + C;
-                // if (i == 0 && t < 20) cerr << "k t theta " << k << " " << t << " " << agt[i].theta[k][t - 1] << endl;
-                chmax(ma, agt[i].Q[k][t]);
+                if (agt[i].n[k][t] == 0) {
+                    arm_id = k;
+                    A.eb(k);
+                    break;
+                }
             }
 
-            rep(k, n_arm) if (abs(agt[i].Q[k][t] - ma) < eps) A.eb(k);
+            if (arm_id == -1) {
+                double ma = -100000.0;
+                rep(k, n_arm) {
+                    if (!agt[i].pullable[k]) continue;
+
+                    // double alpha1 = 64.0; // Cの1つ上の式, p13
+                    // rep(_, 17) alpha1 /= n_machine;
+                    assert(agt[i].n[k][t]);
+                    double C = sqrt(2.0 * n_machine / agt[i].n[k][t] * log(t)); // + alpha1; // p13
+                    agt[i].Q[k][t] = agt[i].theta[k][t - 1] + C;
+                    // if (i == 0 && t < 20) cerr << "k t theta " << k << " " << t << " " << agt[i].theta[k][t - 1] << endl;
+                    chmax(ma, agt[i].Q[k][t]);
+                }
+
+                rep(k, n_arm) {
+                    if (!agt[i].pullable[k]) continue;
+
+                    if (abs(agt[i].Q[k][t] - ma) < eps) A.eb(k);
+                }
+            }
         }
         arm_id = A[rand() % sz(A)];
         assert(arm_id != -1);
         agt[i].a[t] = arm_id;
+        assert(agt[i].pullable[arm_id]);
 
         // if (i == 0 && t < 20) {
         //     cerr << "t arm_id " << t << " " << arm_id << endl;

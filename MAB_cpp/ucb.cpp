@@ -3,26 +3,41 @@
 
 // global knowledge, バイアスなし
 // 使うもの agt.a, X
-void ucb(vector<Agent> &agt, vector<MAB> &env) {
-    for (double c : {2}) {
-        rep(i, n_machine) agt[i].init(); // agt.a, X
+void ucb(vector<Agent> &agt, vector<MAB> &env, vector<vector<pii> > &contact_nodes) {
+    double c = 2;
+    rep(i, n_machine) agt[i].init(); // agt.a, X
 
-        vector<Ucb> a(n_machine);
-        // aの初期化
+    vector<Ucb> a(n_machine);
+    // aの初期化
+    rep(i, n_machine) {
+        a[i].init(c, env[i]);
+    }
+
+    rep(t, MAX_STEPS) {
+        // if (t % 5000 == 0) cerr << "gucb t " << t << endl;
+
         rep(i, n_machine) {
-            a[i].init(c, env[i]);
+            int arm_id = a[i].action(i, t, agt[i]); // ucb.hpp
+            assert(arm_id != -1);
+
+            // if (i == 5 && t % 100 == 0) {
+            //     cerr << "t " << t << endl;
+            //     int cnt = 0;
+            //     cerr << "pullable    " << " ";
+            //     rep(k, n_arm) {
+            //         if (agt[i].pullable[k]) {
+            //             ++cnt;
+            //             cerr << k << " ";
+            //         }
+            //     }
+            //     // cerr << cnt << endl;
+            //     cerr << endl;
+            // }
+
+            agt[i].a[t] = arm_id;
         }
 
-        rep(t, MAX_STEPS) {
-            if (t % 5000 == 0) cerr << "t " << t << endl;
-
-            rep(i, n_machine) {
-                int arm_id = a[i].action(i, t, agt[i]); // ucb.hpp
-                agt[i].a[t] = arm_id;
-            }
-        }
-
-        output("ucb.txt", agt); // global.cpp/agt.X
+        // excInfo(t, agt, contact_nodes, 0, 0, vector<double>(), 0, 0);
     }
 }
 
@@ -113,7 +128,7 @@ void ucb2(vector<Agent> &agt, vector<vector<pii> > &contact_nodes, vector<MAB> &
         }
 
         rep3(t, 1, MAX_STEPS) {
-            if (t % 5000 == 0) cerr << "t " << t << endl;
+            // if (t % 5000 == 0) cerr << "t " << t << endl;
 
             // tに関して更新されていない値を更新
             rep(i, n_machine) {
@@ -129,12 +144,8 @@ void ucb2(vector<Agent> &agt, vector<vector<pii> > &contact_nodes, vector<MAB> &
                 agt[i].a[t] = arm_id;
             }
 
-            if (exc_info) excInfo(t, agt, contact_nodes, exc_Q, weighted, C_wc, 0, 0); 
+            // 接触時だからjのt-1の情報を使える
+            if (exc_info) excInfo(t, agt, contact_nodes, exc_Q, weighted, C_wc, 0, 0);
         }
-
-        string filename = "ucb2_1.txt";
-        if (!exc_info) filename = "ucb2_0.txt";
-        if (weighted) filename = "ucb3.txt";
-        output(filename, agt);
     }
 }

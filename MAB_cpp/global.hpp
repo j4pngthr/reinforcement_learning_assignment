@@ -44,8 +44,9 @@ using pip = pair<int, pii>;
 const int inf = 1000000007;
 const double dinf = 1000000007;
 
-extern int n_arm, n_machine, MAX_STEPS, itv, round_id, N_ROUND;
-extern double init_val;
+extern int n_arm, n_machine, MAX_STEPS, itv, round_id, N_ROUND, opt_lv_id;
+extern double init_val, opt_val;
+extern set<string> st;
 
 class Lever {
     double mu;
@@ -78,7 +79,7 @@ public:
     vector<int> a, pullable;
     vector<double> bias;
     set<int> e; // 隣接ノードの集合
-    int limited = 0;
+    int limited = 1;
 
     vector<double> lambda, d, hop, parent;
     int id;
@@ -86,6 +87,8 @@ public:
     // vector<vector<double> > Qd;
     // vector<Agent> ngb; // initがめんどい
     vector<int> met_last;
+
+    vector<int> P;
 
     // 1度だけ
     Agent() {
@@ -150,11 +153,15 @@ public:
         a = vector<int>(MAX_STEPS + 5, -1);
 
         met_last = vector<int>(n_machine, -1);
+
+        P = vector<int>(n_arm, 0);
     }
 };
 
-void output(string filename, vector<Agent> &agt);
+string outputRegret(string filename, vector<Agent> &agt, vector<Lever> &lv);
+string outputReward(string filename, vector<Agent> &agt);
 void calcXTilde(int i, int k, int t, Agent &agt);
 void excInfo(int t, vector<Agent> &agt, vector<vector<pii> > &contact_nodes, int exc_Q, int weighted, vector<double> C_wc, int need_ngb, int update_unused);
+void changeTimeInterval(string filename);
 
 #endif

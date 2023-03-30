@@ -24,24 +24,39 @@ public:
     // Qはレバーを決めるのに使う
     // 出力はこれまでもX
     int action(int machine_id, int t, Agent &agt) {
-        double ma = -100000.0;
         int arm_id = -1;
-
         rep(k, n_arm) { // arm_idを求める
-            if (!agt.pullable[k]) continue;
+            // if (!agt.pullable[k]) continue;
 
-            double temp = -100000.0;
             if (N[k] == 0) {
                 arm_id = k;
                 break;
-            } else { // N[k] != 0
-                temp = Q[k] + c * sqrt(log(t) / N[k]);
-                if (chmax(ma, temp)) {
-                    arm_id = k;
-                }
             }
         }
-        assert(arm_id != -1);
+        // if (machine_id == 0 && t % 100 == 0) cerr << "ucb.hpp/t arm_id " << t << " " << arm_id << endl;
+
+        if (arm_id == -1) {
+            double ma = -100000.0;
+            rep(k, n_arm) { // arm_idを求める
+                // if (!agt.pullable[k]) continue;
+
+                double temp = Q[k] + c * sqrt(log(t) / N[k]);
+                chmax(ma, temp);
+            }
+
+            vector<int> A;
+            rep(k, n_arm) {
+                // if (!agt.pullable[k]) continue;
+
+                double temp = Q[k] + c * sqrt(log(t) / N[k]);
+                if (ma - temp < eps) {
+                    A.eb(k);
+                }
+            }
+            assert(sz(A));
+            arm_id = A[rand() % sz(A)];
+        }
+        // assert(agt.pullable[arm_id]);
 
         double r = env.bandit(arm_id, machine_id, t, agt); // agt.X[arm_id][t]
 
@@ -75,20 +90,32 @@ public:
     int action(int machine_id, int t, Agent &agt) {
         double ma = -100000.0;
         int arm_id = -1;
-        // int cnt = 0; // 引けるレバーの個数
         rep(k, n_arm) { // arm_idを求める
             if (!agt.pullable[k]) continue;
-            // ++cnt;
 
             if (agt.n[k][t] == 0) {
                 arm_id = k;
                 break;
-            } else {
-                double temp = agt.Q[k][t] + c * sqrt(log(t) / agt.n[k][t]);
-                if (chmax(ma, temp)) {
-                    arm_id = k;
-                }
             }
+        }
+
+        if (arm_id == -1) {
+            rep(k, n_arm) { // arm_idを求める
+                if (!agt.pullable[k]) continue;
+
+                double temp = agt.Q[k][t] + c * sqrt(log(t) / agt.n[k][t]);
+                chmax(ma, temp);
+            }
+
+            vector<int> A;
+            rep(k, n_arm) {
+                if (!agt.pullable[k]) continue;
+
+                double temp = agt.Q[k][t] + c * sqrt(log(t) / agt.n[k][t]);
+                if (ma - temp < eps) A.eb(k);
+            }
+            assert(sz(A));
+            arm_id = A[rand() % sz(A)];
         }
         assert(arm_id != -1);
 
@@ -105,7 +132,7 @@ public:
     }
 };
 
-void ucb(vector<Agent> &agt, vector<MAB> &env);
+void ucb(vector<Agent> &agt, vector<MAB> &env, vector<vector<pii> > &contact_nodes);
 void ucb2(vector<Agent> &agt, vector<vector<pii> > &contact_nodes, vector<MAB> &env, int exc_info, int exc_Q, int weighted);
 
 #endif

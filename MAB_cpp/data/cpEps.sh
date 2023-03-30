@@ -1,0 +1,10 @@
+cp regret.eps temp/regret_copy.eps
+cp reward.eps temp/reward_copy.eps
+cp gossip_regret.txt temp/gossip_regret.txt
+cp gossip_reward.txt temp/gossip_reward.txt
+cp gucb_regret.txt temp/gucb_regret.txt
+cp gucb_reward.txt temp/gucb_reward.txt
+cp iucb_regret.txt temp/iucb_regret.txt
+cp iucb_reward.txt temp/iucb_reward.txt
+cp proposed_regret.txt temp/proposed_regret.txt
+cp proposed_reward.txt temp/proposed_reward.txt

@@ -31,7 +31,7 @@ void gossip(vector<Agent> &agt, vector<vector<pii> > &contact_nodes, vector<MAB>
     // agt.thetaは必ず更新される
     // 使うの agt.n, X, X_tilde, Q, n_tilde, a, theta
     rep3(t, 1, MAX_STEPS) {
-        if (t % 1000 == 0) cerr << "t " << t << endl;
+        // if (t % 1000 == 0) cerr << "t " << t << endl;
 
         // t←t-1する必要があるもの
         rep(i, n_machine) {
@@ -58,6 +58,4 @@ void gossip(vector<Agent> &agt, vector<vector<pii> > &contact_nodes, vector<MAB>
         // 情報交換
         excInfo(t, agt, contact_nodes, 1, 0, vector<double>(), 0, 1); // exc_Q, weighted, need_ngb, update_unused
     }
-
-    output("gossip.txt", agt); // global.cpp
 }
